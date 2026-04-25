@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>نظام توزيع التدريب الصيفي — كلية التميز 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Cairo',sans-serif;background:#eef2f7;color:#1e293b;min-height:100vh;}
+:root{--navy:#1E2761;--teal:#0EA5A0;--amber:#EF9F27;--green:#3DB370;--coral:#E8593C;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px;}
+
+/* Header */
+.header{background:linear-gradient(135deg,var(--navy) 0%,#2a3d9e 100%);padding:18px 24px;color:white;}
+.header-title{font-size:1.35rem;font-weight:900;letter-spacing:-.3px;}
+.header-sub{font-size:.78rem;opacity:.7;margin-top:3px;}
+.stats-bar{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+.stat-chip{background:rgba(255,255,255,.1);border-radius:8px;padding:7px 14px;display:flex;align-items:center;gap:8px;}
+.stat-num{font-size:1.2rem;font-weight:900;}
+.stat-lbl{font-size:.72rem;opacity:.75;}
+.header-btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px;}
+
+/* Tabs */
+.tabs{background:white;border-bottom:2px solid #e2e8f0;display:flex;padding:0 20px;overflow-x:auto;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.tab{padding:13px 16px;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;font-family:'Cairo',sans-serif;font-size:.86rem;color:#64748b;font-weight:500;transition:all .15s;white-space:nowrap;}
+.tab.on{border-bottom-color:var(--teal);color:var(--teal);font-weight:700;}
+.tab:hover:not(.on){color:var(--navy);}
+.tabs-right{flex:1;}
+
+/* Buttons */
+.btn{border:none;border-radius:7px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;transition:all .15s;}
+.btn:hover{opacity:.87;transform:translateY(-1px);}
+.btn:active{transform:none;}
+.btn-teal{background:var(--teal);color:white;}
+.btn-amber{background:var(--amber);color:white;}
+.btn-gray{background:#f1f5f9;color:#475569;}
+.btn-danger{background:#fee2e2;color:#ef4444;}
+.btn-sm{padding:6px 12px;font-size:.78rem;}
+.btn-md{padding:9px 18px;font-size:.86rem;}
+.btn-lg{padding:11px 22px;font-size:.92rem;}
+
+/* Content */
+.content{padding:20px;}
+.filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+select,input[type=text]{font-family:'Cairo',sans-serif;font-size:.83rem;border:1.5px solid #e2e8f0;border-radius:7px;padding:8px 11px;background:white;color:#1e293b;outline:none;transition:border-color .15s;}
+select:focus,input:focus{border-color:var(--teal);}
+
+/* Table */
+.card{background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.07);}
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:.8rem;}
+thead tr{background:var(--navy);}
+th{padding:12px 10px;text-align:right;color:white;font-weight:700;white-space:nowrap;font-size:.82rem;}
+tbody tr{transition:background .1s;}
+tbody tr:hover td{background:#f0fdf9!important;}
+td{padding:9px 10px;border-bottom:1px solid #f1f5f9;}
+.badge{display:inline-block;padding:2px 9px;border-radius:4px;font-size:.72rem;color:white;white-space:nowrap;}
+.manual-badge{background:#fef9c3;color:#854d0e;border-radius:4px;padding:1px 7px;font-size:.7rem;font-weight:700;}
+
+/* Summary cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;}
+.sum-card{background:white;border-radius:11px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+.mini-bar-track{background:#f1f5f9;border-radius:3px;height:5px;margin-top:2px;}
+.mini-bar-fill{border-radius:3px;height:5px;transition:width .4s;}
+
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;display:flex;align-items:center;justify-content:center;animation:fi .15s;}
+.modal{background:white;border-radius:14px;padding:24px;width:92%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:su .2s;}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+@keyframes su{from{transform:translateY(18px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-sel{width:100%;padding:11px 14px;border-radius:8px;border:2px solid var(--teal);font-family:'Cairo',sans-serif;font-size:.95rem;margin-top:10px;}
+.modal-actions{display:flex;gap:10px;margin-top:16px;}
+
+/* Manage list */
+.min-item{display:flex;align-items:center;padding:11px 16px;border-bottom:1px solid #f1f5f9;}
+.num-circle{width:26px;height:26px;background:var(--navy);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;margin-left:10px;flex-shrink:0;}
+
+/* Changes log */
+.change-item{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid #f1f5f9;}
+.arrow{margin:0 6px;color:var(--amber);}
+
+/* Empty state */
+.empty{text-align:center;padding:40px;color:#94a3b8;}
+.empty-icon{font-size:2.5rem;margin-bottom:10px;}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:white;padding:10px 22px;border-radius:8px;font-size:.85rem;font-weight:600;z-index:9999;animation:fi .2s;box-shadow:0 4px 20px rgba(0,0,0,.25);}
+
+/* Print styles */
+@media print{
+  .tabs,.header-btns,.filters .btn,button{display:none!important;}
+  .content{padding:0;}
+  .card{box-shadow:none;border:1px solid #e2e8f0;}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ===================== DATA =====================
+const GOV_COORDS={'بغداد':[33.34,44.40],'بابل':[32.48,44.53],'كربلاء':[32.61,44.03],'واسط':[32.49,45.82],'البصرة':[30.51,47.82],'الانبار':[33.36,43.30],'ديالى':[33.77,44.97],'كركوك':[35.47,44.39],'صلاح الدين':[34.59,43.68],'الديوانية':[31.99,44.93],'ذي قار':[31.04,46.27],'النجف':[31.99,44.33],'السليمانية':[35.56,45.44],'الموصل':[36.34,43.13],'الناصرية':[31.04,46.27],'الكوت':[32.49,45.82]};
+const DC={'نظم المعلومات التطبيقية':'#0EA5A0','علم البيانات':'#1E2761','ادارة الاعمال والتجارة الكترونية':'#EF9F27','محاسبة و مصارف':'#3DB370','فلسفة وعلم الاجتماع':'#E8593C'};
+const DS={'نظم المعلومات التطبيقية':'نظم المعلومات','ادارة الاعمال والتجارة الكترونية':'إدارة الأعمال','محاسبة و مصارف':'محاسبة ومصارف','فلسفة وعلم الاجتماع':'فلسفة واجتماع','علم البيانات':'علم البيانات'};
+
+let ministries=[
+  {id:1,name:'وزارة التخطيط',city:'بغداد',coords:[33.34,44.40]},
+  {id:2,name:'وزارة الاتصالات وتقنية المعلومات',city:'بغداد',coords:[33.34,44.40]},
+  {id:3,name:'وزارة المالية',city:'بغداد',coords:[33.34,44.40]},
+  {id:4,name:'وزارة التجارة',city:'بغداد',coords:[33.34,44.40]},
+  {id:5,name:'هيئة الاتصالات والإعلام الرقمي',city:'بغداد',coords:[33.34,44.40]},
+  {id:6,name:'شركة زين العراق',city:'بغداد',coords:[33.34,44.40]},
+  {id:7,name:'شركة آسياسيل',city:'بغداد',coords:[33.34,44.40]},
+  {id:8,name:'المصرف الرافدين - المركز',city:'بغداد',coords:[33.34,44.40]},
+  {id:9,name:'شركة نفط الجنوب',city:'البصرة',coords:[30.51,47.82]},
+  {id:10,name:'ميناء البصرة',city:'البصرة',coords:[30.51,47.82]},
+  {id:11,name:'ديوان محافظة ذي قار',city:'ذي قار',coords:[31.04,46.27]},
+  {id:12,name:'ديوان محافظة النجف',city:'النجف',coords:[31.99,44.33]},
+  {id:13,name:'ديوان محافظة الديوانية',city:'الديوانية',coords:[31.99,44.93]},
+  {id:14,name:'ديوان محافظة كربلاء',city:'كربلاء',coords:[32.61,44.03]},
+  {id:15,name:'ديوان محافظة بابل',city:'بابل',coords:[32.48,44.53]},
+  {id:16,name:'ديوان محافظة واسط',city:'واسط',coords:[32.49,45.82]},
+  {id:17,name:'ديوان محافظة ديالى',city:'ديالى',coords:[33.77,44.97]},
+  {id:18,name:'ديوان محافظة صلاح الدين',city:'صلاح الدين',coords:[34.59,43.68]},
+  {id:19,name:'ديوان محافظة كركوك',city:'كركوك',coords:[35.47,44.39]},
+  {id:20,name:'ديوان محافظة الأنبار',city:'الانبار',coords:[33.36,43.30]},
+  {id:21,name:'ديوان محافظة السليمانية',city:'السليمانية',coords:[35.56,45.44]},
+  {id:22,name:'مجلس محافظة نينوى',city:'الموصل',coords:[36.34,43.13]},
+];
+
+const STUDENTS=[
+  [1,'ابراهيم حسنين عبد الحمزه حسن','نظم المعلومات التطبيقية','بابل','كلا'],
+  [2,'احمد محمد احمد طه المشهداني','نظم المعلومات التطبيقية','بغداد','كلا'],
+  [3,'ايه فراس هادي خضير خياط','نظم المعلومات التطبيقية','بغداد','كلا'],
+  [4,'أساور قصي محمد جاسم العيساوي','نظم المعلومات التطبيقية','بغداد','كلا'],
+  [5,'أيهم حماد صبار عبد المحمدي','نظم المعلومات التطبيقية','الانبار','نعم'],
+  [6,'باقر محمدصادق حسين شياع','نظم المعلومات التطبيقية','كربلاء','كلا'],
+  [7,'بسمه ضياء كامل احمد النبري','نظم المعلومات التطبيقية','الانبار','نعم'],
+  [8,'حسن ذاكر عوده حمادي الدليمي','نظم المعلومات التطبيقية','الانبار','كلا'],
+  [9,'حسين فلاح عبد الهادي محمد الربيعي','نظم المعلومات التطبيقية','بابل','نعم'],
+  [10,'زهراء حامد عبد الرحيم هواش المالكي','نظم المعلومات التطبيقية','بغداد','كلا'],
+  [11,'ساره صابر جماغ سلمان الفهداوي','نظم المعلومات التطبيقية','واسط','نعم'],
+  [12,'دينا علي فاضل محمدعلي العامري','نظم المعلومات التطبيقية','بغداد','كلا'],
+  [13,'علي احمد عجيل علك الساعدي','نظم المعلومات التطبيقية','بغداد','كلا'],
+  [14,'عمر سلمان عبدالله محمد العبيدي','نظم المعلومات التطبيقية','الانبار','كلا'],
+  [15,'محمود سعد اسماعيل صالح الجبوري','نظم المعلومات التطبيقية','بغداد','كلا'],
+  [16,'مريم ارشد نجم عبدالله','نظم المعلومات التطبيقية','البصرة','نعم'],
+  [17,'مريم محمد عبدالكريم جباره','نظم المعلومات التطبيقية','بغداد','كلا'],
+  [18,'مصطفى أحمد عقيل عبد المهدي البو قاسم','نظم المعلومات التطبيقية','بغداد','كلا'],
+  [19,'مصطفى حسين عدنان عباس','نظم المعلومات التطبيقية','بغداد','كلا'],
+  [20,'مصطفى محمد عباس علوان البدري','نظم المعلومات التطبيقية','بغداد','كلا'],
+  [21,'موسى سعد جبار جبر السراي','نظم المعلومات التطبيقية','بغداد','كلا'],
+  [22,'ناهده علي عبود صالح التميمي','نظم المعلومات التطبيقية','بغداد','كلا'],
+  [23,'نور الهدى واثق سعد رشيد الموزان','نظم المعلومات التطبيقية','بغداد','كلا'],
+  [24,'يقين حسين إبراهيم عباس المحمدي','نظم المعلومات التطبيقية','الانبار','كلا'],
+  [25,'يوسف اسامه عادل شناوه الزبيدي','نظم المعلومات التطبيقية','بغداد','كلا'],
+  [26,'يوسف زيد غازي كاظم','نظم المعلومات التطبيقية','ديالى','نعم'],
+  [27,'ابراهيم صدام ابراهيم صائل الجبوري','علم البيانات','كركوك','نعم'],
+  [28,'احمد غدير جليل عبد الخالق الخزرجي','علم البيانات','الكوت','نعم'],
+  [29,'الحسن عمار يونس المطر','علم البيانات','البصرة','نعم'],
+  [30,'الياس ادريس سلطان جادالله الجبوري','علم البيانات','صلاح الدين','كلا'],
+  [31,'انوار حيدر عبد الحسن مدلول الفتلاوي','علم البيانات','الديوانية','نعم'],
+  [32,'ايه عبد اللطيف خاشع عبد اللطيف','علم البيانات','بغداد','كلا'],
+  [33,'تبارك محمد فرهود صبيح اللكاشي','علم البيانات','الديوانية','نعم'],
+  [34,'تحسين مهدي بارح دنخ الدريعي','علم البيانات','واسط','نعم'],
+  [35,'رسول مشتاق حسين عبد التميمي','علم البيانات','بغداد','كلا'],
+  [36,'رضا برير هاشم فخري الحكيم','علم البيانات','كربلاء','كلا'],
+  [37,'رفل جبار رضيو حسون','علم البيانات','ذي قار','نعم'],
+  [38,'زهراء عمار ستار متعب','علم البيانات','بغداد','كلا'],
+  [39,'صابرين أمير خميس حمودي الرمضاوي','علم البيانات','بغداد','كلا'],
+  [40,'طيبه علي عويد غالي السعيدي','علم البيانات','ذي قار','نعم'],
+  [41,'علي عماد عباس جعفر الملا','علم البيانات','بغداد','كلا'],
+  [42,'علي قيصر صالح إبراهيم','علم البيانات','النجف','نعم'],
+  [43,'عمر علي شاكر نوري البرزنجي','علم البيانات','ديالى','نعم'],
+  [44,'فاطمه ستار جواد لفته','علم البيانات','ذي قار','نعم'],
+  [45,'فرح ممدوح ابراهيم فاضل العبيدي','علم البيانات','بغداد','كلا'],
+  [46,'محمد خالد ماضي سرهيد الجنابي','علم البيانات','السليمانية','نعم'],
+  [47,'محمد رحيم قاسم راضي','علم البيانات','بغداد','كلا'],
+  [48,'ملاك مهند حميد ناصر العامري','علم البيانات','بغداد','كلا'],
+  [49,'منار ستار جبار عبد علي الزريجاوي','علم البيانات','بابل','كلا'],
+  [50,'مؤمل علي شريف رسن الكناني','علم البيانات','بغداد','كلا'],
+  [51,'نور أحمد عباس حطيحط العابدين العكيلي','علم البيانات','بابل','كلا'],
+  [52,'ازهار محمد موسى كاظم الكيظي','ادارة الاعمال والتجارة الكترونية','بابل','كلا'],
+  [53,'آمنه مثنى محروس علي العزاوي','ادارة الاعمال والتجارة الكترونية','صلاح الدين','نعم'],
+  [54,'تبارك رشيد مجيد ابراهيم السورميري','ادارة الاعمال والتجارة الكترونية','ديالى','كلا'],
+  [55,'رقيه حسين عبد فضل','ادارة الاعمال والتجارة الكترونية','الديوانية','نعم'],
+  [56,'ريم فاضل طالب حسن','ادارة الاعمال والتجارة الكترونية','بغداد','كلا'],
+  [57,'زهراء حميد عباس فياض الجبوري','ادارة الاعمال والتجارة الكترونية','بابل','نعم'],
+  [58,'زينب اياد أحمد عبدلله الجبوري','ادارة الاعمال والتجارة الكترونية','بغداد','كلا'],
+  [59,'ساره محمد عبد الزهره محمد الطائي','ادارة الاعمال والتجارة الكترونية','بابل','نعم'],
+  [60,'عباس جواد كاظم محمد','ادارة الاعمال والتجارة الكترونية','الناصرية','كلا'],
+  [61,'عبدالله سلام قمر علي بور','ادارة الاعمال والتجارة الكترونية','ديالى','كلا'],
+  [62,'عبدالله عبدالحسين محسن مهدي القريشي','ادارة الاعمال والتجارة الكترونية','واسط','نعم'],
+  [63,'عقيل حيدر صبحي كاظم','ادارة الاعمال والتجارة الكترونية','البصرة','نعم'],
+  [64,'علي يونس ابراهيم علي الدلوي','ادارة الاعمال والتجارة الكترونية','ديالى','نعم'],
+  [65,'فاطمه احسان زهير حسن','ادارة الاعمال والتجارة الكترونية','بغداد','كلا'],
+  [66,'فاطمه ستار حمادي هاشم الزيدي','ادارة الاعمال والتجارة الكترونية','ذي قار','نعم'],
+  [67,'فرح اسماعيل غايب عبدالله الكروي','ادارة الاعمال والتجارة الكترونية','بغداد','كلا'],
+  [68,'محمد فاضل تركي كاظم المسرجي','ادارة الاعمال والتجارة الكترونية','الديوانية','نعم'],
+  [69,'مصطفى عبد الامير حمزة كاظم','ادارة الاعمال والتجارة الكترونية','النجف','كلا'],
+  [70,'مصطفى منذر يوسف سلمان','ادارة الاعمال والتجارة الكترونية','الديوانية','نعم'],
+  [71,'هاله وليد ظاهر جاسم الخزرجي','ادارة الاعمال والتجارة الكترونية','بغداد','كلا'],
+  [72,'يونس رمضان رجب شعبان الكرخي','ادارة الاعمال والتجارة الكترونية','ديالى','نعم'],
+  [73,'أمل مظهر حسوني جويد الدراجي','محاسبة و مصارف','بغداد','كلا'],
+  [74,'ابراهيم اسكندر علي حسين الجاف','محاسبة و مصارف','بغداد','كلا'],
+  [75,'احمد علي كاظم عطيه العادلي','محاسبة و مصارف','بغداد','كلا'],
+  [76,'احمد محمد مجيد حمود','محاسبة و مصارف','الانبار','كلا'],
+  [77,'اراس سيروان عبدالحسين حبيب','محاسبة و مصارف','بغداد','كلا'],
+  [78,'بلال رعد ضاري ابراهيم العبيدي','محاسبة و مصارف','ديالى','نعم'],
+  [79,'جاسم محمد توفيق محمود','محاسبة و مصارف','ديالى','نعم'],
+  [80,'رويدة طارق عليوي عبدالله الجبوري','محاسبة و مصارف','بغداد','كلا'],
+  [81,'ساره حازم غازي عبد التميمي','محاسبة و مصارف','بغداد','كلا'],
+  [82,'سجاد ناظم فالح شتيوي العارضي','محاسبة و مصارف','النجف','نعم'],
+  [83,'شهد علي وجر خواف','محاسبة و مصارف','بغداد','كلا'],
+  [84,'عبدالله سمير نوري رسن الابيض','محاسبة و مصارف','بغداد','كلا'],
+  [85,'علاء يحيى جابر عطيه','محاسبة و مصارف','الناصرية','نعم'],
+  [86,'علي باسم جاسم محمد الغرابي','محاسبة و مصارف','الديوانية','نعم'],
+  [87,'علي عبد الحسن علي حبيب السعدي','محاسبة و مصارف','بابل','نعم'],
+  [88,'علي محمود شاكر محمود الحلو','محاسبة و مصارف','بغداد','كلا'],
+  [89,'عمار حيدر منفي حسن الطائي','محاسبة و مصارف','كربلاء','نعم'],
+  [90,'فاطمه الزهراء ناصر حسين عبيس الجوذري','محاسبة و مصارف','بابل','نعم'],
+  [91,'فرح احمد صالح غتر ثعبه','محاسبة و مصارف','بغداد','كلا'],
+  [92,'محمد رحيم عطيه مشعل الزيدي','محاسبة و مصارف','ذي قار','نعم'],
+  [93,'محمد عماد سعد ابراهيم','محاسبة و مصارف','ديالى','نعم'],
+  [94,'مرام علي مصطفى ابراهيم العزاوي','محاسبة و مصارف','بغداد','كلا'],
+  [95,'مصطفى مطلك عجمي بطاح العايدي','محاسبة و مصارف','واسط','نعم'],
+  [96,'موفق دريد عبدالله عبدالوهاب المجمعي','محاسبة و مصارف','ديالى','نعم'],
+  [97,'مي عمر حامد محمد الغريري','محاسبة و مصارف','بغداد','كلا'],
+  [98,'نرجس محمود رحيم روضان','محاسبة و مصارف','بغداد','كلا'],
+  [99,'ياسر عمار محمدعلي حسين','محاسبة و مصارف','بغداد','كلا'],
+  [100,'ايمان شاكر حسين الشمري','فلسفة وعلم الاجتماع','ديالى','نعم'],
+  [101,'تماره زياد احمد شهاب حاجو','فلسفة وعلم الاجتماع','الموصل','نعم'],
+  [102,'حنان حميد رشيد عبد الجبار القيسي','فلسفة وعلم الاجتماع','بغداد','كلا'],
+  [103,'رونق جبار كامل جبار الموسوي','فلسفة وعلم الاجتماع','بغداد','كلا'],
+  [104,'زهراء رياض عباس ابراهيم','فلسفة وعلم الاجتماع','ديالى','نعم'],
+  [105,'عائشه قاسم ذياب جاسم العزاوي','فلسفة وعلم الاجتماع','ديالى','نعم'],
+  [106,'علي مهند خميس عويز الخزعلي','فلسفة وعلم الاجتماع','بغداد','كلا'],
+  [107,'فاطمه ياسين كامل محمد عكداوي','فلسفة وعلم الاجتماع','الناصرية','نعم'],
+  [108,'محمد باقر باسم كاظم جساب','فلسفة وعلم الاجتماع','الناصرية','نعم'],
+  [109,'محمد عصام سهيل نجم','فلسفة وعلم الاجتماع','ديالى','نعم'],
+  [110,'نهى مشعان كريم حسن','فلسفة وعلم الاجتماع','ديالى','نعم'],
+  [111,'نور الهدى عماد علي احمد زنكنه','فلسفة وعلم الاجتماع','بغداد','كلا'],
+  [112,'نورهان اياد احمد عبدالامير','فلسفة وعلم الاجتماع','بغداد','كلا'],
+];
+
+// ===================== STATE =====================
+let state={tab:'table',fDept:'الكل',fGov:'الكل',search:'',modal:null,overrides:{},history:[],newMinName:'',newMinCity:''};
+
+// ===================== LOGIC =====================
+function hav([la1,lo1],[la2,lo2]){
+  const R=6371,t=x=>x*Math.PI/180;
+  const a=Math.sin(t(la2-la1)/2)**2+Math.cos(t(la1))*Math.cos(t(la2))*Math.sin(t(lo2-lo1)/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function nearest(gov){
+  const c=GOV_COORDS[gov]||GOV_COORDS['بغداد'];
+  let best=null,bd=Infinity;
+  for(const m of ministries){const d=hav(c,m.coords);if(d<bd){bd=d;best=m;}}
+  return{name:best?.name||'-',city:best?.city||'-',dist:Math.round(bd),coords:best?.coords||[33.34,44.40]};
+}
+function getAssigned(){
+  return STUDENTS.map(([id,name,dept,gov,boarding])=>{
+    const auto=nearest(gov);
+    const manual=state.overrides[id];
+    const mObj=ministries.find(m=>m.name===(manual||auto.name));
+    const mName=mObj?.name||auto.name;
+    const mCity=mObj?.city||auto.city;
+    const dist=Math.round(hav(GOV_COORDS[gov]||GOV_COORDS['بغداد'],mObj?.coords||auto.coords));
+    return{id,name,dept,gov,boarding,mName,mCity,dist,isManual:!!manual,autoMin:auto.name};
+  });
+}
+function getSummary(assigned){
+  const m={};
+  for(const s of assigned){
+    if(!m[s.mName])m[s.mName]={city:s.mCity,students:[],boarding:0};
+    m[s.mName].students.push(s);
+    if(s.boarding==='نعم')m[s.mName].boarding++;
+  }
+  return Object.entries(m).sort((a,b)=>b[1].students.length-a[1].students.length);
+}
+function toast(msg){
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  document.body.appendChild(t);setTimeout(()=>t.remove(),2400);
+}
+
+// ===================== ACTIONS =====================
+function applyOverride(id,newName){
+  const assigned=getAssigned();
+  const old=state.overrides[id]||assigned.find(s=>s.id===id)?.autoMin;
+  state.history.push({id,from:old,to:newName,time:new Date().toLocaleTimeString('ar-IQ')});
+  const auto=assigned.find(s=>s.id===id)?.autoMin;
+  if(newName===auto)delete state.overrides[id];
+  else state.overrides[id]=newName;
+  state.modal=null;render();toast('✅ تم تغيير الجهة');
+}
+function undoChange(idx){
+  const h=state.history[idx];
+  state.history.splice(idx,1);
+  const assigned=getAssigned();
+  const auto=assigned.find(s=>s.id===h.id)?.autoMin;
+  if(h.from===auto||!h.from)delete state.overrides[h.id];
+  else state.overrides[h.id]=h.from;
+  render();toast('↩ تم التراجع');
+}
+function exportExcel(){
+  const assigned=getAssigned();
+  const d=assigned.map(s=>({'ت':s.id,'اسم الطالب':s.name,'القسم العلمي':s.dept,'المحافظة':s.gov,'داخلي':s.boarding,'الجهة المقترحة للتدريب':s.mName,'مدينة الجهة':s.mCity,'المسافة (كم)':s.dist,'تعديل يدوي':s.isManual?'نعم':''}));
+  const ws=XLSX.utils.json_to_sheet(d);
+  ws['!cols']=[{wch:4},{wch:38},{wch:22},{wch:14},{wch:8},{wch:40},{wch:14},{wch:12},{wch:12}];
+  const sum=getSummary(assigned).map(([n,{city,students,boarding}])=>({'الجهة':n,'المدينة':city,'إجمالي الطلبة':students.length,'منهم داخليون':boarding}));
+  const ws2=XLSX.utils.json_to_sheet(sum);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'جدول التوزيع');
+  XLSX.utils.book_append_sheet(wb,ws2,'ملخص الجهات');
+  XLSX.writeFile(wb,'توزيع_التدريب_الصيفي_2026.xlsx');
+  toast('⬇️ جاري تحميل ملف Excel');
+}
+
+// ===================== RENDER =====================
+const COLORS=['#0EA5A0','#1E2761','#EF9F27','#3DB370','#E8593C','#1D4ED8','#7C3AED','#BE185D','#065F46','#B45309'];
+function render(){
+  const assigned=getAssigned();
+  const sum=getSummary(assigned);
+  const depts=['الكل',...new Set(STUDENTS.map(s=>s[2]))];
+  const govs=['الكل',...new Set(STUDENTS.map(s=>s[3]))];
+  const filtered=assigned.filter(s=>
+    (state.fDept==='الكل'||s.dept===state.fDept)&&
+    (state.fGov==='الكل'||s.gov===state.fGov)&&
+    (!state.search||s.name.includes(state.search)||s.mName.includes(state.search))
+  );
+  const mc=Object.keys(state.overrides).length;
+
+  const H=`
+  <div class="header">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div class="header-title">🎓 نظام توزيع التدريب الصيفي</div>
+        <div class="header-sub">كلية التميز — جامعة بغداد &nbsp;|&nbsp; ${assigned.length} طالب &nbsp;|&nbsp; ${ministries.length} جهة تدريب${mc>0?` &nbsp;|&nbsp; <span style="color:#EF9F27;font-weight:700;">${mc} تعديل يدوي</span>`:''}</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${mc>0?`<button class="btn btn-gray btn-md" onclick="S({overrides:{},history:[]})">↺ إعادة الضبط</button>`:''}
+        <button class="btn btn-amber btn-md" onclick="exportExcel()">⬇️ تصدير Excel</button>
+      </div>
+    </div>
+    <div class="stats-bar">
+      ${[[assigned.filter(s=>s.boarding==='نعم').length,'طالب داخلي','#0EA5A0','🏠'],
+         [mc,'تعديل يدوي','#EF9F27','✏️'],
+         [sum.length,'جهة مُشغَّلة','#3DB370','🏢'],
+         [new Set(assigned.map(s=>s.gov)).size,'محافظة','#E8593C','📍']]
+        .map(([n,l,c,ic])=>`<div class="stat-chip"><span>${ic}</span><span class="stat-num" style="color:${c};">${n}</span><span class="stat-lbl">${l}</span></div>`).join('')}
+    </div>
+  </div>
+
+  <div class="tabs">
+    ${[['table','📋 جدول التوزيع'],['summary','📊 ملخص الجهات'],['manage','⚙️ إدارة الجهات'],['changes','🕓 سجل التعديلات'+(mc>0?` (${mc})`:'')]]
+      .map(([k,l])=>`<button class="tab ${state.tab===k?'on':''}" onclick="S({tab:'${k}'})">${l}</button>`).join('')}
+    <div class="tabs-right"></div>
+  </div>
+
+  <div class="content">`;
+
+  let BODY='';
+
+  if(state.tab==='table'){
+    BODY+=`
+    <div class="filters">
+      <select onchange="S({fDept:this.value})">${depts.map(d=>`<option ${state.fDept===d?'selected':''}>${d}</option>`).join('')}</select>
+      <select onchange="S({fGov:this.value})">${govs.map(g=>`<option ${state.fGov===g?'selected':''}>${g}</option>`).join('')}</select>
+      <input type="text" value="${state.search}" oninput="S({search:this.value})" placeholder="🔍 بحث بالاسم أو الجهة..." style="min-width:220px;"/>
+      <span style="font-size:.8rem;color:#94a3b8;"><b style="color:#0EA5A0;">${filtered.length}</b> طالب</span>
+      ${mc>0?`<span style="background:#fef9c3;color:#854d0e;padding:4px 10px;border-radius:6px;font-size:.78rem;font-weight:700;">⚡ ${mc} تعديل يدوي</span>`:''}
+    </div>
+    <div class="card"><div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>ت</th><th>اسم الطالب</th><th>القسم</th><th>المحافظة</th>
+        <th>داخلي</th><th>الجهة المُعيَّنة</th><th>المدينة</th><th>المسافة</th><th>تعديل</th>
+      </tr></thead>
+      <tbody>
+        ${filtered.map((s,i)=>`<tr>
+          <td style="background:${i%2?'#f8fafc':'white'};color:#94a3b8;font-size:.74rem;">${s.id}</td>
+          <td style="background:${i%2?'#f8fafc':'white'};font-weight:600;">${s.name}</td>
+          <td style="background:${i%2?'#f8fafc':'white'};"><span class="badge" style="background:${DC[s.dept]||'#94a3b8'};">${DS[s.dept]||s.dept}</span></td>
+          <td style="background:${i%2?'#f8fafc':'white'};">${s.gov}</td>
+          <td style="background:${i%2?'#f8fafc':'white'};text-align:center;color:${s.boarding==='نعم'?'#0EA5A0':'#cbd5e1'};font-weight:700;">${s.boarding==='نعم'?'✓':'—'}</td>
+          <td style="background:${i%2?'#f8fafc':'white'};"><span style="font-weight:700;color:${s.isManual?'#EF9F27':'#1E2761'};">${s.mName}</span>${s.isManual?' <span class="manual-badge">يدوي</span>':''}</td>
+          <td style="background:${i%2?'#f8fafc':'white'};color:#64748b;">${s.mCity}</td>
+          <td style="background:${i%2?'#f8fafc':'white'};font-weight:700;color:${s.dist<50?'#3DB370':s.dist<250?'#EF9F27':'#E8593C'};">${s.dist} كم</td>
+          <td style="background:${i%2?'#f8fafc':'white'};"><button class="btn btn-teal btn-sm" onclick='openM(${JSON.stringify(s)})'>✏️ تغيير</button></td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div></div>`;
+  }
+
+  if(state.tab==='summary'){
+    BODY+=`<div class="grid">
+      ${sum.map(([name,{city,students,boarding}],i)=>{
+        const cc=COLORS[i%COLORS.length];
+        const mc2=students.filter(s=>s.isManual).length;
+        return`<div class="sum-card" style="border-top:3px solid ${cc};">
+          <div style="font-weight:700;color:#1E2761;margin-bottom:3px;">${name}</div>
+          <div style="font-size:.75rem;color:#64748b;margin-bottom:10px;">📍 ${city}</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="background:${cc};color:white;border-radius:20px;padding:4px 16px;font-weight:900;font-size:1.1rem;">${students.length}</span>
+            <div style="font-size:.74rem;color:#64748b;">
+              <div>${boarding} داخلي</div>
+              ${mc2>0?`<div style="color:#EF9F27;font-weight:700;">${mc2} تعيين يدوي ✏️</div>`:''}
+            </div>
+          </div>
+          ${[...new Set(students.map(s=>s.dept))].map(d=>{
+            const cnt=students.filter(s=>s.dept===d).length;
+            return`<div style="margin-bottom:5px;font-size:.7rem;">
+              <div style="display:flex;justify-content:space-between;color:#64748b;margin-bottom:2px;"><span>${DS[d]||d}</span><span>${cnt}</span></div>
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="background:${DC[d]||cc};width:${Math.round(cnt/students.length*100)}%;"></div></div>
+            </div>`;
+          }).join('')}
+          <div style="font-size:.7rem;color:#94a3b8;max-height:65px;overflow-y:auto;line-height:1.8;border-top:1px solid #f1f5f9;padding-top:7px;margin-top:7px;">
+            ${students.map(s=>`<span style="${s.isManual?'color:#EF9F27;font-weight:600;':''}">${s.name}${s.isManual?' ✏️':''}</span>`).join(' · ')}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  if(state.tab==='manage'){
+    BODY+=`
+    <div style="max-width:680px;">
+      <div class="card" style="padding:18px;margin-bottom:18px;">
+        <div style="font-weight:700;color:#1E2761;margin-bottom:14px;font-size:.95rem;">➕ إضافة جهة تدريب جديدة</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <input id="nn" type="text" value="${state.newMinName}" oninput="state.newMinName=this.value" placeholder="اسم الجهة أو الوزارة" style="flex:2;min-width:180px;"/>
+          <select id="nc" onchange="state.newMinCity=this.value" style="flex:1;min-width:130px;">
+            <option value="">اختر المدينة</option>
+            ${Object.keys(GOV_COORDS).filter(g=>!['الناصرية','الكوت'].includes(g)).map(g=>`<option ${state.newMinCity===g?'selected':''}>${g}</option>`).join('')}
+          </select>
+          <button class="btn btn-teal btn-md" onclick="addMin()">إضافة</button>
+        </div>
+      </div>
+      <div class="card">
+        <div style="background:#1E2761;color:white;padding:12px 16px;font-weight:700;font-size:.85rem;display:flex;align-items:center;gap:8px;">
+          الجهات المُسجَّلة <span style="background:#0EA5A0;border-radius:10px;padding:1px 10px;font-size:.78rem;">${ministries.length}</span>
+        </div>
+        ${ministries.map((m,i)=>{
+          const cnt=sum.find(([n])=>n===m.name)?.[1]?.students?.length||0;
+          return`<div class="min-item" style="background:${i%2?'#f8fafc':'white'};">
+            <div class="num-circle">${i+1}</div>
+            <div style="flex:1;"><div style="font-weight:600;font-size:.87rem;">${m.name}</div><div style="font-size:.72rem;color:#64748b;">📍 ${m.city}</div></div>
+            <span style="background:#f0fdf9;color:#0EA5A0;padding:2px 11px;border-radius:10px;font-size:.75rem;font-weight:700;margin-left:10px;">${cnt} طالب</span>
+            <button class="btn btn-danger btn-sm" onclick="removeMin(${m.id})">حذف</button>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
+
+  if(state.tab==='changes'){
+    BODY+=`<div style="max-width:700px;">
+      ${state.history.length===0?`
+        <div class="card empty">
+          <div class="empty-icon">📋</div>
+          <div style="font-weight:600;margin-bottom:6px;">لا توجد تعديلات يدوية بعد</div>
+          <div style="font-size:.82rem;">اضغط زر ✏️ تغيير أمام أي طالب في جدول التوزيع</div>
+        </div>
+      `:`
+        <div class="card">
+          <div style="background:#EF9F27;color:#1E2761;padding:12px 16px;font-weight:700;font-size:.85rem;">سجل التعديلات — ${state.history.length} تعديل</div>
+          ${state.history.map((h,idx)=>{
+            const st=STUDENTS.find(s=>s[0]===h.id);
+            const active=state.overrides[h.id]===h.to;
+            return`<div class="change-item" style="background:${active?'#fffbeb':'#f8fafc'};">
+              <div style="flex:1;">
+                <div style="font-weight:600;font-size:.87rem;">${st?.[1]||'—'}</div>
+                <div style="font-size:.75rem;margin-top:3px;color:#64748b;">
+                  <span style="color:#94a3b8;">${h.from}</span>
+                  <span class="arrow">→</span>
+                  <span style="color:#0EA5A0;font-weight:700;">${h.to}</span>
+                  &nbsp;
+                  ${active?'<span class="manual-badge">مفعَّل</span>':'<span style="background:#f1f5f9;color:#94a3b8;border-radius:3px;padding:1px 6px;font-size:.68rem;">مُلغى</span>'}
+                  ${h.time?`<span style="color:#94a3b8;font-size:.68rem;margin-right:6px;">${h.time}</span>`:''}
+                </div>
+              </div>
+              <button class="btn btn-gray btn-sm" onclick="undoChange(${idx})">↩ تراجع</button>
+            </div>`;
+          }).join('')}
+        </div>
+      `}
+    </div>`;
+  }
+
+  const MODAL=state.modal?`
+  <div class="overlay" onclick="S({modal:null})">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h2 style="font-size:1rem;color:#1E2761;font-weight:900;">✏️ تغيير جهة التدريب</h2>
+        <button onclick="S({modal:null})" style="background:#f1f5f9;border:none;border-radius:50%;width:30px;height:30px;font-size:1.1rem;cursor:pointer;">×</button>
+      </div>
+      <div style="background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:16px;">
+        <div style="font-weight:700;font-size:.92rem;color:#1E2761;">${state.modal.name}</div>
+        <div style="font-size:.78rem;color:#64748b;margin-top:4px;">
+          <span class="badge" style="background:${DC[state.modal.dept]||'#94a3b8'};">${DS[state.modal.dept]}</span>&nbsp;
+          📍 ${state.modal.gov}&nbsp;
+          ${state.modal.boarding==='نعم'?'<span style="color:#0EA5A0;font-weight:700;">✓ داخلي</span>':''}
+        </div>
+        <div style="font-size:.78rem;color:#64748b;margin-top:7px;">
+          الجهة الحالية: <b style="color:${state.modal.isManual?'#EF9F27':'#1E2761'};">${state.modal.mName}</b>
+          ${state.modal.isManual?`<span class="manual-badge"> يدوي</span><br><small style="color:#94a3b8;">الجهة التلقائية: ${state.modal.autoMin}</small>`:''}
+        </div>
+      </div>
+      <label style="font-size:.83rem;color:#475569;font-weight:600;">اختر الجهة الجديدة:</label>
+      <select id="msel" class="modal-sel">
+        ${ministries.map(m=>`<option ${m.name===state.modal.mName?'selected':''}>${m.name} — ${m.city}</option>`).join('')}
+      </select>
+      <div class="modal-actions">
+        <button class="btn btn-teal btn-lg" style="flex:1;" onclick="doOverride()">✅ تأكيد</button>
+        ${state.modal.isManual?`<button class="btn btn-gray btn-md" onclick="applyOverride(${state.modal.id},'${state.modal.autoMin}')">↺ تلقائي</button>`:''}
+        <button class="btn btn-gray btn-md" onclick="S({modal:null})">إلغاء</button>
+      </div>
+    </div>
+  </div>`:'';
+
+  document.getElementById('app').innerHTML=H+BODY+'</div>'+MODAL;
+}
+
+// ===================== HELPERS =====================
+function S(patch){Object.assign(state,patch);render();}
+function openM(s){state.modal=s;render();}
+function doOverride(){
+  const sel=document.getElementById('msel');
+  if(sel)applyOverride(state.modal.id,sel.value.split(' — ')[0]);
+}
+function addMin(){
+  const n=document.getElementById('nn')?.value.trim()||state.newMinName;
+  const c=document.getElementById('nc')?.value||state.newMinCity;
+  if(!n||!c){toast('⚠️ يرجى إدخال الاسم والمدينة');return;}
+  ministries.push({id:Math.max(...ministries.map(m=>m.id))+1,name:n,city:c,coords:GOV_COORDS[c]||[33.34,44.40]});
+  state.newMinName='';state.newMinCity='';
+  render();toast(`✅ تمت إضافة: ${n}`);
+}
+function removeMin(id){
+  const m=ministries.find(x=>x.id===id);
+  if(confirm(`هل تريدين حذف "${m?.name}"؟`)){
+    ministries=ministries.filter(x=>x.id!==id);render();toast('🗑️ تم الحذف');
+  }
+}
+window.S=S;window.openM=openM;window.doOverride=doOverride;
+window.applyOverride=applyOverride;window.undoChange=undoChange;
+window.exportExcel=exportExcel;window.addMin=addMin;window.removeMin=removeMin;
+
+render();
+</script>
+</body>
+</html>
